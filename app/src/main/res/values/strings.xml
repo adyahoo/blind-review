@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">ComposeCodeLab</string>
+    <string name="show_more">Show more</string>
+    <string name="show_less">Show less</string>
+    <string name="search">Search</string>
+    <string name="inversion">Inversion</string>
+    <string name="align_your_body">Align your Body</string>
+    <string name="favorite_collection">Favorite Collections</string>
+    <string name="home">Home</string>
+    <string name="profile">Profile</string>
+</resources>
