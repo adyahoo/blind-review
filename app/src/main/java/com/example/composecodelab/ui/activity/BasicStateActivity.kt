@@ -25,14 +25,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.composecodelab.data.TaskItemModel
 import com.example.composecodelab.data.getTasks
 import com.example.composecodelab.ui.theme.ComposeCodeLabTheme
+import com.example.composecodelab.ui.viewmodel.BasicStateViewModel
 
 class BasicStateActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,10 +54,17 @@ class BasicStateActivity : ComponentActivity() {
 }
 
 @Composable
-fun BasicStateScreen(modifier: Modifier = Modifier) {
+fun BasicStateScreen(
+    modifier: Modifier = Modifier,
+    stateViewModel: BasicStateViewModel = viewModel()
+) {
     Column(modifier) {
         StatefulCounter()
-        TaskList()
+        TaskList(
+            list = stateViewModel.tasks,
+            onClose = { task -> stateViewModel.remove(task) },
+            onChecked = { task, checked -> stateViewModel.updateCheckedValue(task, checked) }
+        )
     }
 }
 
@@ -119,16 +129,17 @@ fun TaskItem(
 
 @Composable
 fun TaskItem(
+    modifier: Modifier = Modifier,
     name: String,
-    modifier: Modifier = Modifier
+    checked: Boolean,
+    onClose: () -> Unit,
+    onChecked: (Boolean) -> Unit
 ) {
-    var checkedState by remember { mutableStateOf(false) }
-
     TaskItem(
         name = name,
-        isChecked = checkedState,
-        onChecked = { newValue -> checkedState = newValue },
-        onClose = {},
+        isChecked = checked,
+        onChecked = { newValue -> onChecked(newValue) },
+        onClose = onClose,
         modifier
     )
 }
@@ -137,10 +148,19 @@ fun TaskItem(
 fun TaskList(
     modifier: Modifier = Modifier,
     list: List<TaskItemModel> = remember { getTasks() },
+    onClose: (TaskItemModel) -> Unit,
+    onChecked: (TaskItemModel, Boolean) -> Unit
 ) {
     LazyColumn(modifier) {
-        items(list) {
-            TaskItem(name = it.label)
+        items(
+            items = list,
+            key = { task -> task.id }
+        ) {
+            TaskItem(
+                name = it.label,
+                checked = it.checked,
+                onClose = { onClose(it) },
+                onChecked = { newValue -> onChecked(it, newValue) })
         }
     }
 }
